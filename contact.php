@@ -15,12 +15,14 @@ $contact = new Contact($config);
 
 //Check allowed method
 if($contact->checkMethod()){
+    //Process data
+    $contact->processBody();
+
     // Send mail and save result as response success value
     $response['success'] = $contact->send();
 } else {
     $response['error'] = 'You must send mail using ' . Contact::$ALLOWED_METHOD . ' method';
 }
-
 
 // Print response as json
 echo json_encode($response);

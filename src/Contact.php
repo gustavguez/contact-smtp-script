@@ -23,11 +23,19 @@ class Contact {
         $this->mailFromName = $config['mailFromName'];
         $this->mailTo = $config['mailTo'];
         $this->mailSubject = $config['mailSubject'];
-        $this->mailBody = 'Contact mail body';
+        $this->mailBody = '';
     }
 
     public function checkMethod(){
         return $_SERVER['REQUEST_METHOD'] === self::$ALLOWED_METHOD;
+    }
+
+    public function processBody() {
+        $email = strip_tags($_POST['email']);
+        $message = strip_tags($_POST['message']);
+
+        // Load mail body
+        $this->mailBody = "EMAIL: $email \n MESSAGE: $message";
     }
 
     public function send(){
@@ -56,7 +64,6 @@ class Contact {
             $response = $mail->send();
         } catch (\Exception $e) {
             //Do nothing
-            var_dump($e->getMessage());
         }
         return $response;
     }

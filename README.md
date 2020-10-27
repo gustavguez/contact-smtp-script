@@ -1,5 +1,5 @@
-# Contact SMTP Script
-Scrip for contact forms, email is sent via SMTP.
+# Contact SMTP Script for your personal web
+Scrip for contact form, email is sent via SMTP to prevent SPAM folder.
 
 ## Requirements
 - PHP
@@ -12,5 +12,9 @@ Copy the `config.dist.php` file to `config.php` and complete value with valid va
 Then run this comands in terminal:
 ``` sh
 $ composer install
-$ php -S localhost:8000 contact.php
 ```
+
+Then upload `vendor`, `src`, `config.php` and `contact.php` to your server.
+
+## Example
+In the folder `examples` you have an example of how to use this script :).
