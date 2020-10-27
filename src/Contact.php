@@ -35,13 +35,17 @@ class Contact {
         $message = strip_tags($_POST['message']);
 
         // Load mail body
-        $this->mailBody = "EMAIL: $email \n MESSAGE: $message";
+        // @@TODO: improve this using twig or smarty
+        $this->mailBody = "<p><strong>EMAIL:</strong> $email</p>" . 
+                          "<p><strong>MESSAGE:</strong> $message</p>";
     }
 
     public function send(){
         // Instantiation and passing `true` enables exceptions
         $mail = new PHPMailer(true);
         $response = false;
+
+        // @@TODO: use recaptcha v3 to prevent spam
 
         try {
             //Server settings
