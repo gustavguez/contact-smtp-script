@@ -36,15 +36,15 @@ class Contact {
         $this->data = [];
     }
 
-    public function checkMethod(){
-        return $_SERVER['REQUEST_METHOD'] === self::$ALLOWED_METHOD;
+    public function isValid() {
+        return $this->checkMethod() && $this->formFieldsAreValid(); 
     }
 
     public function processPayload() {
-        //Load data
+        //Load data.
         $this->data = [
-            'email' => strip_tags($_POST['email']),
-            'message' => strip_tags($_POST['message'])
+            'email'   => filter_var( $_POST['email'], FILTER_SANITIZE_EMAIL ),
+            'message' => filter_var( $_POST['message'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW ),
         ];
     }
 
@@ -85,5 +85,13 @@ class Contact {
             //Do nothing
         }
         return $response;
+    }
+
+    private function checkMethod(){
+        return $_SERVER['REQUEST_METHOD'] === self::$ALLOWED_METHOD;
+    }
+
+    private function formFieldsAreValid() {
+        return filter_var( $_POST['email'], FILTER_VALIDATE_EMAIL ) && ! empty( filter_var( $_POST['message'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW ) );
     }
 }
