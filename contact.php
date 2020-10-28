@@ -13,8 +13,8 @@ $response = [ 'success' => false, 'error' => '' ];
 // Create Client class object from src/Contact.php 
 $contact = new Contact($config);
 
-// Check allowed method
-if($contact->checkMethod()){
+// Check allowed method and run minimal validation.
+if( $contact->isValid() ){
     // Process data
     $contact->processPayload();
 
@@ -24,7 +24,7 @@ if($contact->checkMethod()){
     // Send mail and save result as response success value
     $response['success'] = $contact->send();
 } else {
-    $response['error'] = 'You must send mail using ' . Contact::$ALLOWED_METHOD . ' method';
+    $response['error'] = 'Form has errors!';
 }
 
 // Print response as json
