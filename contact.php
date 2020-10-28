@@ -13,10 +13,13 @@ $response = [ 'success' => false, 'error' => '' ];
 // Create Client class object from src/Contact.php 
 $contact = new Contact($config);
 
-//Check allowed method
+// Check allowed method
 if($contact->checkMethod()){
-    //Process data
-    $contact->processBody();
+    // Process data
+    $contact->processPayload();
+
+    // Render mailbody
+    $contact->renderBody();
 
     // Send mail and save result as response success value
     $response['success'] = $contact->send();

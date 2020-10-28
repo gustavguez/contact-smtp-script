@@ -6,4 +6,7 @@ return [
     'mailFromName' => 'Contact mailer',
     'mailTo' => 'exampleFrom@example.com',
     'mailSubject' => 'Contact from web',
+
+    'templatesDir' => __DIR__ . '/src/templates/',
+    'templatesFile' => 'contact.html'
 ];

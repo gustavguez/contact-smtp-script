@@ -3,6 +3,8 @@ namespace Gustavguez;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 class Contact {
 
@@ -14,7 +16,11 @@ class Contact {
     protected $mailFromName;
     protected $mailTo;
     protected $mailSubject;
-    protected $mailBody;
+    protected $templatesDir;
+    protected $templatesFile;
+
+    protected $bodyHTML;
+    protected $data;
     
     public function __construct(array $config) {
         $this->mailHost = $config['mailHost'];
@@ -23,21 +29,30 @@ class Contact {
         $this->mailFromName = $config['mailFromName'];
         $this->mailTo = $config['mailTo'];
         $this->mailSubject = $config['mailSubject'];
-        $this->mailBody = '';
+        $this->templatesDir = $config['templatesDir'];
+        $this->templatesFile = $config['templatesFile'];
+
+        $this->bodyHTML = '';
+        $this->data = [];
     }
 
     public function checkMethod(){
         return $_SERVER['REQUEST_METHOD'] === self::$ALLOWED_METHOD;
     }
 
-    public function processBody() {
-        $email = strip_tags($_POST['email']);
-        $message = strip_tags($_POST['message']);
+    public function processPayload() {
+        //Load data
+        $this->data = [
+            'email' => strip_tags($_POST['email']),
+            'message' => strip_tags($_POST['message'])
+        ];
+    }
 
-        // Load mail body
-        // @@TODO: improve this using twig or smarty
-        $this->mailBody = "<p><strong>EMAIL:</strong> $email</p>" . 
-                          "<p><strong>MESSAGE:</strong> $message</p>";
+    public function renderBody(){
+        //Render html using TWIG
+        $loader = new FilesystemLoader($this->templatesDir);
+        $twig = new Environment($loader, []);
+        $this->bodyHTML = $twig->render($this->templatesFile, $this->data);
     }
 
     public function send(){
@@ -63,7 +78,7 @@ class Contact {
             // Content
             $mail->isHTML(true);                                  // Set email format to HTML
             $mail->Subject = $this->mailSubject;
-            $mail->Body    = $this->mailBody;
+            $mail->Body    = $this->bodyHTML;
 
             $response = $mail->send();
         } catch (\Exception $e) {

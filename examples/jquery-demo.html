@@ -73,6 +73,12 @@
                         //Check result
                         if(json.success){
                             displayResult(true, 'Message was sent :)');
+
+                            //Clear form
+                            $('#contact').trigger('reset');
+
+                            //Wait 3 seconds to clear success result
+                            setTimeout(hideResult, 3000);
                             return;
                         }
 
