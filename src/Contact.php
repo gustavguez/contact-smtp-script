@@ -10,6 +10,7 @@ class Contact {
 
     public static $ALLOWED_METHOD = 'POST';
 
+    //Configs
     protected $mailHost;
     protected $mailFrom;
     protected $mailFromPassword;
@@ -18,9 +19,12 @@ class Contact {
     protected $mailSubject;
     protected $templatesDir;
     protected $templatesFile;
+    protected $recaptchaSecret;
 
+    //Data
     protected $bodyHTML;
     protected $data;
+    protected $recaptchaToken;
     
     public function __construct(array $config) {
         $this->mailHost = $config['mailHost'];
@@ -31,13 +35,14 @@ class Contact {
         $this->mailSubject = $config['mailSubject'];
         $this->templatesDir = $config['templatesDir'];
         $this->templatesFile = $config['templatesFile'];
+        $this->recaptchaSecret = $config['recaptchaSecret'];
 
         $this->bodyHTML = '';
         $this->data = [];
     }
 
     public function isValid() {
-        return $this->checkMethod() && $this->formFieldsAreValid(); 
+        return $this->checkMethod() && $this->formFieldsAreValid() && $this->recaptchaAreValid(); 
     }
 
     public function processPayload() {
@@ -46,6 +51,11 @@ class Contact {
             'email'   => filter_var( $_POST['email'], FILTER_SANITIZE_EMAIL ),
             'message' => filter_var( $_POST['message'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW ),
         ];
+
+        //Load recaptcha
+        if(!empty($_POST['recaptchaToken'])){
+            $this->recaptchaToken = filter_var( $_POST['recaptchaToken'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW );
+        }
     }
 
     public function renderBody(){
@@ -93,5 +103,10 @@ class Contact {
 
     private function formFieldsAreValid() {
         return !empty($this->data['email']) && !empty($this->data['message']);
+    }
+
+    private function recaptchaAreValid() {
+        //TODO: install Guzzle and finish https://developers.google.com/recaptcha/docs/verify
+        return true;
     }
 }

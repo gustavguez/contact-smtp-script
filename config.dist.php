@@ -8,5 +8,8 @@ return [
     'mailSubject' => 'Contact from web',
 
     'templatesDir' => __DIR__ . '/src/templates/',
-    'templatesFile' => 'contact.html'
+    'templatesFile' => 'contact.html',
+
+    'recaptchaSecret' => '',
+    'recaptchaKey' => ''
 ];
