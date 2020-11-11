@@ -13,10 +13,11 @@ $response = [ 'success' => false, 'error' => '' ];
 // Create Client class object from src/Contact.php 
 $contact = new Contact($config);
 
+// Process data
+$contact->processPayload();
+
 // Check allowed method and run minimal validation.
 if( $contact->isValid() ){
-    // Process data
-    $contact->processPayload();
 
     // Render mailbody
     $contact->renderBody();
