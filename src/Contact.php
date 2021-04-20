@@ -3,12 +3,14 @@ namespace Gustavguez;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
+use GuzzleHttp\Client;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 class Contact {
 
     public static $ALLOWED_METHOD = 'POST';
+    public static $RECAPTCHA_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
     //Configs
     protected $mailHost;
@@ -25,6 +27,10 @@ class Contact {
     protected $bodyHTML;
     protected $data;
     protected $recaptchaToken;
+
+    //Services
+    protected $mailer;
+    protected $guzzle;
     
     public function __construct(array $config) {
         $this->mailHost = $config['mailHost'];
@@ -39,6 +45,10 @@ class Contact {
 
         $this->bodyHTML = '';
         $this->data = [];
+
+        //Init services
+        $this->mailer = new PHPMailer(true);
+        $this->guzzle = new Client();
     }
 
     public function isValid() {
@@ -66,31 +76,27 @@ class Contact {
     }
 
     public function send(){
-        // Instantiation and passing `true` enables exceptions
-        $mail = new PHPMailer(true);
         $response = false;
-
-        // @@TODO: use recaptcha v3 to prevent spam
 
         try {
             //Server settings
-            $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      // Enable verbose debug output
-            $mail->Host       = $this->mailHost;                    // Set the SMTP server to send through
-            $mail->Username   = $this->mailFrom;                     // SMTP username
-            $mail->Password   = $this->mailFromPassword;                               // SMTP password
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` also accepted
-            $mail->Port       = 465;                                    // TCP port to connect to
+            $this->mailer->SMTPDebug = SMTP::DEBUG_SERVER;                      // Enable verbose debug output
+            $this->mailer->Host       = $this->mailHost;                    // Set the SMTP server to send through
+            $this->mailer->Username   = $this->mailFrom;                     // SMTP username
+            $this->mailer->Password   = $this->mailFromPassword;                               // SMTP password
+            $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` also accepted
+            $this->mailer->Port       = 465;                                    // TCP port to connect to
 
             //Recipients
-            $mail->setFrom($this->mailFrom, $this->mailFromName);
-            $mail->addAddress($this->mailTo);
+            $this->mailer->setFrom($this->mailFrom, $this->mailFromName);
+            $this->mailer->addAddress($this->mailTo);
 
             // Content
-            $mail->isHTML(true);                                  // Set email format to HTML
-            $mail->Subject = $this->mailSubject;
-            $mail->Body    = $this->bodyHTML;
+            $this->mailer->isHTML(true);                                  // Set email format to HTML
+            $this->mailer->Subject = $this->mailSubject;
+            $this->mailer->Body    = $this->bodyHTML;
 
-            $response = $mail->send();
+            $response = $this->mailer->send();
         } catch (\Exception $e) {
             //Do nothing
         }
@@ -106,7 +112,22 @@ class Contact {
     }
 
     private function recaptchaAreValid() {
-        //TODO: install Guzzle and finish https://developers.google.com/recaptcha/docs/verify
+        //Check recpatcha 
+        if(!empty($this->recaptchaToken)){
+            //Do CURL request to google
+            $responseObj = $this->guzzle->post(self::$RECAPTCHA_URL, [
+                'form_params' => [
+                    'secret' => $this->recaptchaSecret,
+                    'response' => $this->recaptchaToken
+                ]
+            ]);
+
+            //Check response
+            $response = json_decode($responseObj->getBody());
+            
+            //return success
+            return $response->success;
+        }
         return true;
     }
 }
