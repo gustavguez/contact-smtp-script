@@ -87,9 +87,18 @@ class Contact {
             $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` also accepted
             $this->mailer->Port       = 465;                                    // TCP port to connect to
 
-            //Recipients
+            //From
             $this->mailer->setFrom($this->mailFrom, $this->mailFromName);
-            $this->mailer->addAddress($this->mailTo);
+            
+            //Recipients
+            if(is_array($this->mailTo)){
+                //Add multiple mail to
+                foreach ($this->mailTo as $key => $mailTo) {
+                    $this->mailer->addAddress($mailTo);
+                }
+            } else {
+                $this->mailer->addAddress($this->mailTo);
+            }
 
             // Content
             $this->mailer->isHTML(true);                                  // Set email format to HTML
