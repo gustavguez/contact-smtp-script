@@ -122,7 +122,7 @@ class Contact {
 
     private function recaptchaAreValid() {
         //Check recpatcha 
-        if(!empty($this->recaptchaToken)){
+        if(!empty($this->recaptchaSecret)){
             //Do CURL request to google
             $responseObj = $this->guzzle->post(self::$RECAPTCHA_URL, [
                 'form_params' => [
